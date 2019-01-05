@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Giphy API</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/
+	bootstrap.min.css" integrity="sha384-
+	BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+
+<body>
+
+
+
+    <div class="container topBox">
+
+
+
+
+
+        <div class="row" id="buttonRow">
+
+
+
+
+        </div> <!-- Button Row -->
+
+
+
+
+        <div class="row" id="imagesRow">
+
+
+            <div class="col-sm-8" id="images">
+
+
+            </div> <!-- gifShow -->
+
+
+            <form class="col-sm-4">
+
+                <div class="form-group">
+
+                    <label for="formGroupExampleInput">Add a Creature!</label>
+                    <input type="text" class="form-control" id="userAnimalText" placeholder="Type that little furry baby's name">
+                </div>
+
+            </form> <!-- input form -->
+
+        </div> <!-- Images and Form Row -->
+
+
+
+
+
+
+
+    </div> <!-- Top closing container -->
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+    <script type="text/javascript">
+
+
+
+
+        $(document).ready(function () {
+
+
+            var queryURL = "https://api.giphy.com/v1/gifs/random?api_key=8nP2DTVEKBkEubZjDYPr5B0Cm1KxzPsp";
+
+            var topics = ["Llama", "Dog", "Cat", "Rabbit", "Hamster", "Skunk", "Goldfish", "Turtle", "Chinchilla", "Monkey", "Bear", "Lion", "Bull", "Polar Bear", "Parrot", "Alligator", "Elk"];
+
+            renderButtons(topics);
+
+
+
+            //POPULATE BUTTONS ON TOP ROW
+            function renderButtons(arry) {
+
+                $("#buttonRow").empty();
+
+                for (var i = 0; i < arry.length; i++) {
+
+                    var a = $("<button>");
+
+                    // Adding a class
+
+                    a.addClass("animalButtons btn btn-secondary btn-sm active");
+
+                    // Adding a data-attribute
+                    a.attr("data-name", arry[i]);
+
+                    // Providing the button's text
+                    a.text(arry[i]);
+
+                    // Adding the button to the HTML
+                    $("#buttonRow").append(a);
+
+                }//For Loop
+
+            }//Render Buttons
+
+
+            //USER INPUT ENTER DATA INTO BUTTON
+            $("#userAnimalText").keypress(function (e) {
+
+                if (e.which == 13) {
+
+                    e.preventDefault();
+
+
+                    var userAnimalText = $("#userAnimalText").val().trim();
+
+
+                    topics.push(userAnimalText);
+
+                    console.log(topics);
+
+                    renderButtons(topics);
+
+                }
+
+            });
+
+
+
+
+
+
+            //BUTTON CLICK FUNCTION
+            $(document).on("click", ".animalButtons", function () {
+
+                var animal = $(this).attr("data-name");
+
+                var queryURL = "https://api.giphy.com/v1/gifs/search?q="
+                    + animal + "&limit=16&api_key=8nP2DTVEKBkEubZjDYPr5B0Cm1KxzPsp";
+
+                $.ajax({
+
+                    url: queryURL,
+                    method: "GET"
+
+                }).then(function (response) {
+
+                    console.log(response);
+
+                    $("#images").empty();
+
+                    var results = response.data;
+
+                    // Looping over every result item
+                    for (var i = 0; i < results.length; i++) {
+
+                        if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
+
+                            // Creating a div for the gif
+                            var gifDiv = $("<div>");
+
+                            gifDiv.addClass("col-sm-3");
+
+                            var imageUrlFixed = results[i].images.fixed_width_small_still.url
+                            var imageUrlGif = results[i].images.fixed_width_small.url
+
+                            // Storing the result item's rating
+                            var rating = results[i].rating;
+
+                            // Creating a paragraph tag with the result item's rating
+                            var p = $("<p>").text("Rating: " + rating);
+
+                            p.addClass("text-center");
+
+                            // Creating and storing an image tag
+                            var animalImage = $("<img>");
+
+
+                            // Setting the Image src attribute to imageUrl
+                            animalImage.addClass("animalImage");
+                            animalImage.attr("src", imageUrlFixed);
+                            animalImage.attr("alt", "gif");
+                            animalImage.attr("data-still", imageUrlFixed);
+                            animalImage.attr("data-animate", imageUrlGif);
+                            animalImage.attr("data-state", "still");
+
+                            gifDiv.append(animalImage);
+
+                            gifDiv.append(p);
+
+                            // Appending the animalImage to the images div
+                            $("#images").append(gifDiv);
+
+                        }//If Terminator
+
+
+
+                    }//For Loop Terminator
+
+                    $(".animalImage").on("click", function () {
+
+                        console.log(this);
+                        // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+                        var state = $(this).attr("data-state");
+                        if (state === "still") {
+                            $(this).attr("src", $(this).attr("data-animate"));
+                            $(this).attr("data-state", "animate");
+                        } else {
+                            $(this).attr("src", $(this).attr("data-still"));
+                            $(this).attr("data-state", "still");
+                        }
+
+                    });
+
+                }); //Ajax Terminator
+
+
+            }); //Button Row Call
+
+
+        }); //Document Ready 
+
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+</html>
